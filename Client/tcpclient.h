@@ -31,6 +31,6 @@ typedef struct addr {
 void creatConnect(QTcpSocket *tcpsocket, ADDR addr);//Create the connection with Server
 void sendMessages(QTcpSocket *tcpsocket, INFO info);//Send message to Server
 void disConnect(QTcpSocket *tcpsocket);
-void recMessages();//Receive the message from Server
+void recMessages(QTcpSocket *tcpsocket, INFO info);//Receive the message from Server
 
 #endif // TCPCLIENT_H

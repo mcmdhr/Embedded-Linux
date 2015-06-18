@@ -87,6 +87,7 @@ void MainWindow::on_brnTem_clicked()
     info = setInfo(TEMP, 1);
     qDebug()<<info.tag<<info.cmd;
     sendMessages(tcpsocket, info);
+    work(info.tag);
 }
 
 void MainWindow::on_btnSong_clicked()
@@ -103,6 +104,36 @@ void MainWindow::on_btnViewImage_clicked()
     info = setInfo(IMAGE, 1);
     qDebug()<<info.tag<<info.cmd;
     sendMessages(tcpsocket, info);
+    recMessages(tcpsocket, info);
+
+}
+
+
+void MainWindow::work(int tag){
+    recMessages(tcpsocket);
+    //qDebug()<<"Rec"<<info.tag<<info.cmd;
+    switch (tag) {
+    case UP:
+        break;
+    case DOWN:
+        break;
+    case CHAT:
+        break;
+    case IMAGE:
+
+        break;
+    case SONG:
+        break;
+    case LED:
+        break;
+    case TEMP:
+        break;
+    default:
+        break;
+
+    }
+
+
 }
 
 
@@ -119,7 +150,6 @@ struct info MainWindow::setInfo(int tag, int cmd){
         break;
     case IMAGE:
         info.cmd ^= 0xf000;
-        return info;
         break;
     case SONG:
         temp ^=(cmd << 16);

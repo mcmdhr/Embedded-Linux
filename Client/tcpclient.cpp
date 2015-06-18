@@ -25,5 +25,10 @@ void disConnect(QTcpSocket *tcpsocket){
     tcpsocket->disconnectFromHost();
 }
 
+/*
+ * Receive the message from Server
+*/
+void recMessages(QTcpSocket *tcpsocket, INFO info){
+    tcpsocket->read((char *)&info, sizeof(info));
 
-void recMessages();//Receive the message from Server
+}

@@ -1,4 +1,3 @@
-
 #include<stdio.h>
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
@@ -28,6 +27,7 @@ typedef struct info {
 
 int fd;
 int cli_fd;
+INFO info;
 
 void *work(void *arg);
 int updata(INFO info);
@@ -35,11 +35,15 @@ int downdata(INFO info, int c_fd);
 int check(INFO info, int c_fd);
 int creatcon(int argc, char **argv);
 
-int image(INFO info);
+int image(INFO info, int cli_fd);
 int song(INFO info);
 int led(INFO info);
 int temp(INFO temp);
+char *getImageToPC();
+char *getImageToLCD();
 
+pthread_t pidImage = 0;
+pthread_t pidTemp = 0;
 
 
 int main(int argc ,char ** argv){
@@ -58,7 +62,6 @@ int main(int argc ,char ** argv){
 
 void *work(void * arg){
     int c_fd=(int)arg;
-    INFO info;
     int m=0;
     memset(&info,0,sizeof(info));
     while(1){
@@ -80,7 +83,13 @@ void *work(void * arg){
                     printf("file null");
                 break;
             case IMAGE:
-                return SUCCESS;
+				if(info.cmd & 0xf000 >0 && pidImage>0){
+					pthread_create(&pidImage,NULL, image,(void *)c_fd);
+					//image(info, c_fd);
+				}else{
+					pthread_cancel(pidImage);
+				}
+                break;
             case SONG:
 				song(info);
                 break;
@@ -127,8 +136,22 @@ int creatcon(int argc, char **argv){
 
 }
 
-int image(INFO info){
-
+int image(INFO info, int cli_fd){
+	while (1){
+		
+		char imagename[32] = getImageToPC();
+		getImageToLCD();
+		FILE * fp_image = fopen(imagename,"r");
+		if(!fp_image){
+			char *buf = "no such file\n";
+			return ERR;
+		}
+		fread(info.buf,sizeof(info.buf),1,fp_image);
+		info.buf[strlen(info.buf)] = '\0';
+		write(cli_fd,&info,sizeof(info));
+		sleep(0.1);
+	
+	}
 }
 
 int song(INFO info){
@@ -181,4 +204,13 @@ int check(INFO info,int c_fd){
         return SUCCESS;
     }
 */
+}
+
+char *getImageToLCD(){
+
+}
+
+char *getImageToPC(){
+	char *test = "1.jpg";
+	return test;
 }

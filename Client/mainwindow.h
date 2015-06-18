@@ -26,6 +26,7 @@ public:
 public:
     struct info setInfo(int tag, int cmd);
     int newConnect();
+    void work(int tag);
     ~MainWindow();
 
 private slots:
