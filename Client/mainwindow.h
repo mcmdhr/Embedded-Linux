@@ -30,6 +30,7 @@ public:
     ~MainWindow();
 
 private slots:
+    void readMessage();
 
     void on_btnLED1_clicked();
 

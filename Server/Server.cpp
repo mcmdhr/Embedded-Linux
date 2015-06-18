@@ -23,6 +23,7 @@ typedef struct info {
     int tag;
     int cmd;
     char buf[1024];
+	float temp;
 }INFO;
 
 int fd;
@@ -41,6 +42,7 @@ int led(INFO info);
 int temp(INFO temp);
 char *getImageToPC();
 char *getImageToLCD();
+float getTemp();
 
 pthread_t pidImage = 0;
 pthread_t pidTemp = 0;
@@ -97,6 +99,12 @@ void *work(void * arg){
 				led(info);
                 break;
             case TEMP:
+				if(info.cmd & 0xf000000 >0 && pidTemp>0){
+					pthread_create(&pidTemp,NULL, temp,(void *)c_fd);
+					//image(info, c_fd);
+				}else{
+					pthread_cancel(pidTemp);
+				}			
 				temp(info);
                 break;
             default:
@@ -139,7 +147,8 @@ int creatcon(int argc, char **argv){
 int image(INFO info, int cli_fd){
 	while (1){
 		
-		char imagename[32] = getImageToPC();
+		char imagename[32];
+		strcpy(imagename,getImageToPC());
 		getImageToLCD();
 		FILE * fp_image = fopen(imagename,"r");
 		if(!fp_image){
@@ -149,7 +158,7 @@ int image(INFO info, int cli_fd){
 		fread(info.buf,sizeof(info.buf),1,fp_image);
 		info.buf[strlen(info.buf)] = '\0';
 		write(cli_fd,&info,sizeof(info));
-		sleep(0.1);
+		sleep(0.3);
 	
 	}
 }
@@ -163,6 +172,13 @@ int led(INFO info){
 }
 
 int temp(INFO info){
+	while (1){
+		float t=0;
+		t = getTemp();
+		info.temp = t;
+		write(cli_fd, &info, sizeof(info));
+		sleep(0.3);	
+	}
 
 }
 int updata(INFO info){
@@ -213,4 +229,9 @@ char *getImageToLCD(){
 char *getImageToPC(){
 	char *test = "1.jpg";
 	return test;
+}
+
+float getTemp(){
+	float k= 1.1;
+	return k;
 }

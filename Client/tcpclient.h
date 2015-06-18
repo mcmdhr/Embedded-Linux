@@ -21,6 +21,7 @@ typedef struct info {
     int tag;
     int cmd;
     char buf[1024];
+    float temp;
 }INFO;
 
 typedef struct addr {

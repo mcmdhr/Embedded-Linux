@@ -23,11 +23,26 @@ int MainWindow::newConnect(){
 
 }
 
+
 MainWindow::~MainWindow()
 {
+    tcpsocket->disconnectFromHost();
     delete ui;
 }
 
+void MainWindow::readMessage(){
+qDebug()<<info.temp;
+    while(1){
+        recMessages(tcpsocket, info);
+        if ((info.cmd & 0xf000) >0){
+
+        }
+        if ((info.cmd & 0xf000000) > 0){
+            qDebug()<<info.temp;
+        }
+    }
+
+}
 
 void MainWindow::on_btnConnect2Server_clicked()
 {
@@ -87,7 +102,7 @@ void MainWindow::on_brnTem_clicked()
     info = setInfo(TEMP, 1);
     qDebug()<<info.tag<<info.cmd;
     sendMessages(tcpsocket, info);
-    work(info.tag);
+  //  work(info.tag);
 }
 
 void MainWindow::on_btnSong_clicked()
@@ -104,13 +119,13 @@ void MainWindow::on_btnViewImage_clicked()
     info = setInfo(IMAGE, 1);
     qDebug()<<info.tag<<info.cmd;
     sendMessages(tcpsocket, info);
-    recMessages(tcpsocket, info);
+    //recMessages(tcpsocket, info);
 
 }
 
 
 void MainWindow::work(int tag){
-    recMessages(tcpsocket);
+    //recMessages(tcpsocket);
     //qDebug()<<"Rec"<<info.tag<<info.cmd;
     switch (tag) {
     case UP:
@@ -142,28 +157,28 @@ struct info MainWindow::setInfo(int tag, int cmd){
     info.tag = tag;
     int temp = info.cmd;
     switch (tag) {
-    case UP:
-        break;
-    case DOWN:
-        break;
-    case CHAT:
-        break;
-    case IMAGE:
-        info.cmd ^= 0xf000;
-        break;
-    case SONG:
-        temp ^=(cmd << 16);
-        info.cmd = temp;
-        break;
-    case LED:
-        temp ^= (cmd << 20);
-        info.cmd = temp;
-        break;
-    case TEMP:
-        info.cmd ^= 0xf000000;
-        break;
-    default:
-        break;
+        case UP:
+            break;
+        case DOWN:
+            break;
+        case CHAT:
+            break;
+        case IMAGE:
+            info.cmd ^= 0xf000;
+            break;
+        case SONG:
+            temp ^=(cmd << 16);
+            info.cmd = temp;
+            break;
+        case LED:
+            temp ^= (cmd << 20);
+            info.cmd = temp;
+            break;
+        case TEMP:
+            info.cmd ^= 0xf000000;
+            break;
+        default:
+            break;
 
     }
     return info;
