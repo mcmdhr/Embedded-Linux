@@ -40,35 +40,68 @@ void MainWindow::on_btnConnect2Server_clicked()
 
 }
 
+int flag1 = 1;
 void MainWindow::on_btnLED1_clicked()
 {
     INFO info;
-    info = setInfo(6, 1);
-
+    //if (flag1 == 0)flag1 = 1; else flag1 = 0;
+    info = setInfo(LED, flag1);
+    qDebug()<<info.tag<<(info.cmd>>20);
     sendMessages(tcpsocket, info);
 }
 
+int flag2=2;
 void MainWindow::on_btnLED2_clicked()
 {
     INFO info;
-    info = setInfo(6, 2);
-
+    //if (flag2 == 0)flag2 = 2; else flag2 = 0;
+    info = setInfo(LED, flag2);
+    qDebug()<<info.tag<<(info.cmd>>20);
     sendMessages(tcpsocket, info);
 }
 
+int flag3=4;
 void MainWindow::on_btnLED3_clicked()
 {
     INFO info;
-    info = setInfo(6, 3);
+    //if (flag3 == 0)flag3 = 4; else flag3 = 0;
+    info = setInfo(LED, flag3);
+    qDebug()<<info.tag<<(info.cmd>>20);
+    sendMessages(tcpsocket, info);
+}
+
+int flag4=8;
+void MainWindow::on_btnLED4_clicked()
+{
+    INFO info;
+    //if (flag4 == 0)flag4 = 8; else flag4 = 0;
+    info = setInfo(LED, flag4);
+    qDebug()<<info.tag<<(info.cmd>>20);
 
     sendMessages(tcpsocket, info);
 }
 
-void MainWindow::on_btnLED4_clicked()
+void MainWindow::on_brnTem_clicked()
 {
     INFO info;
-    info = setInfo(6, 4);
+    info = setInfo(TEMP, 1);
+    qDebug()<<info.tag<<info.cmd;
+    sendMessages(tcpsocket, info);
+}
 
+void MainWindow::on_btnSong_clicked()
+{
+    INFO info;
+    info = setInfo(SONG, 1);
+    qDebug()<<info.tag<<info.cmd;
+    sendMessages(tcpsocket, info);
+}
+
+void MainWindow::on_btnViewImage_clicked()
+{
+    INFO info;
+    info = setInfo(IMAGE, 1);
+    qDebug()<<info.tag<<info.cmd;
     sendMessages(tcpsocket, info);
 }
 
@@ -85,18 +118,15 @@ struct info MainWindow::setInfo(int tag, int cmd){
     case CHAT:
         break;
     case IMAGE:
-        //temp ~= (temp && 0xf000);
-        //temp = temp >> 8;
         info.cmd ^= 0xf000;
         return info;
         break;
     case SONG:
-        temp =(temp && 0xfff0ffff);
-        temp +=(cmd << 16);
+        temp ^=(cmd << 16);
         info.cmd = temp;
         break;
     case LED:
-        temp |= (cmd << 20);
+        temp ^= (cmd << 20);
         info.cmd = temp;
         break;
     case TEMP:
@@ -104,6 +134,8 @@ struct info MainWindow::setInfo(int tag, int cmd){
         break;
     default:
         break;
+
     }
     return info;
 }
+

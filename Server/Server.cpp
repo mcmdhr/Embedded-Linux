@@ -35,6 +35,11 @@ int downdata(INFO info, int c_fd);
 int check(INFO info, int c_fd);
 int creatcon(int argc, char **argv);
 
+int image(INFO info);
+int song(INFO info);
+int led(INFO info);
+int temp(INFO temp);
+
 
 
 int main(int argc ,char ** argv){
@@ -58,7 +63,8 @@ void *work(void * arg){
     memset(&info,0,sizeof(info));
     while(1){
         read(c_fd,&info,sizeof(info));
-        switch(info.tag{
+		printf("tag = %d, cmd = %d\n",info.tag, info.cmd);
+        switch(info.tag){
             case UP:
                 m = updata(info);
                 if( m == -1  )
@@ -69,17 +75,20 @@ void *work(void * arg){
                     printf("file downdata error");
                 break;
             case CHAT:
-                m = check( info ,c_fd );
+                //m = check( info ,c_fd );
                 if( m == -1)
                     printf("file null");
                 break;
             case IMAGE:
                 return SUCCESS;
             case SONG:
+				song(info);
                 break;
             case LED:
+				led(info);
                 break;
             case TEMP:
+				temp(info);
                 break;
             default:
                 ;
@@ -118,6 +127,21 @@ int creatcon(int argc, char **argv){
 
 }
 
+int image(INFO info){
+
+}
+
+int song(INFO info){
+
+}
+
+int led(INFO info){
+
+}
+
+int temp(INFO info){
+
+}
 int updata(INFO info){
     /*FILE * fp_up = fopen(info.filename,"w");
     fwrite(info.buf,strlen(info.buf),1,fp_up);

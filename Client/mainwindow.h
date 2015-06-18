@@ -40,6 +40,12 @@ private slots:
 
     void on_btnLED4_clicked();
 
+    void on_brnTem_clicked();
+
+    void on_btnSong_clicked();
+
+    void on_btnViewImage_clicked();
+
 private:
     QTcpSocket *tcpsocket;
 
@@ -48,5 +54,7 @@ private:
 };
 
 #endif // MAINWINDOW_H
+
+
 
 
