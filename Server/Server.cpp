@@ -42,7 +42,7 @@ int updata(INFO info);
 int downdata(INFO info, int c_fd);
 int check(INFO info, int c_fd);
 int creatcon(int argc, char **argv);
-int song(INFO info);
+int song(int c_fd);
 int led(INFO info);
 
 char *getImageToPC();
@@ -106,7 +106,7 @@ void *work(void * arg){
                 }
                 break;
             case SONG:
-                song(info);
+                song(c_fd);
                 break;
             case LED:
                 printf("LED cmd = %d\n",info.cmd);
@@ -199,7 +199,10 @@ int creatcon(int argc, char **argv){
     
     }
 }*/
-int song(INFO info){
+int song(int c_fd){
+    int numSong = 0;
+    numSong =(info.cmd & 0xf0000) >> 16;
+    singSong(numSong);
 
 }
 

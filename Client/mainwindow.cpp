@@ -121,7 +121,7 @@ void MainWindow::on_btnViewImage_clicked()
 void MainWindow::work(int tag){
     //recMessages(tcpsocket);
     //qDebug()<<"Rec"<<info.tag<<info.cmd;
-    switch (tag) {
+   /* switch (tag) {
     case UP:
         break;
     case DOWN:
@@ -140,7 +140,7 @@ void MainWindow::work(int tag){
     default:
         break;
 
-    }
+    }*/
     return;
 }
 
