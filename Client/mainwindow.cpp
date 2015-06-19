@@ -36,10 +36,6 @@ void MainWindow::readMessage(){
         tcpsocket->read((char *)&inforec, sizeof(inforec));
         qDebug()<<"TEMP:"<<inforec.temp;
         qDebug()<<"IMAGE:"<<inforec.filename;
-       // if ((inforec.cmd & 0xf000000) > 0){
-       //     qDebug()<<"TEMP:"<<inforec.temp;
-       // }
-
 }
 
 void MainWindow::on_btnConnect2Server_clicked()
@@ -118,8 +114,7 @@ void MainWindow::on_btnViewImage_clicked()
     info = setInfo(IMAGE, 1);
     qDebug()<<info.tag<<info.cmd;
     sendMessages(tcpsocket, info);
-    //recMessages(tcpsocket, info);
-
+    return;
 }
 
 
@@ -146,8 +141,7 @@ void MainWindow::work(int tag){
         break;
 
     }
-
-
+    return;
 }
 
 

@@ -23,9 +23,9 @@ typedef struct sockaddr SA;
 typedef struct info {
     int tag;
     int cmd;
-	char filename[32];
+    char filename[32];
     char buf[1024];
-	int temp;
+    int temp;
 
 }INFO;
 
@@ -34,21 +34,25 @@ int cli_fd;
 INFO info;
 
 void *work(void *arg);
+void *image(void *arg);
+void *temp(void *arg);
+void *TempAndImage(void *arg);
+
 int updata(INFO info);
 int downdata(INFO info, int c_fd);
 int check(INFO info, int c_fd);
 int creatcon(int argc, char **argv);
-
-void *image(void *arg);
 int song(INFO info);
 int led(INFO info);
-void *temp(void *arg);
+
 char *getImageToPC();
 char *getImageToLCD();
 float getTemp();
 
-pthread_t pidImage = 0;
+pthread_t pidTaI = 0;
 pthread_t pidTemp = 0;
+pthread_t pidImage = 0;
+
 
 
 int main(int argc ,char ** argv){
@@ -57,7 +61,7 @@ int main(int argc ,char ** argv){
         cli_fd = accept(fd, NULL, NULL);
         if(cli_fd>0){
             printf("There is a client connect!\n");
-			printf("%d\n",cli_fd);
+            printf("%d\n",cli_fd);
             pthread_t pid = 0;
             pthread_create(&pid,NULL,work,(void *)cli_fd);
         }
@@ -69,19 +73,19 @@ int main(int argc ,char ** argv){
 void *work(void * arg){
     int c_fd=(int)arg;
     int m=0;
-	int x;
+    int x;
     memset(&info,0,sizeof(info));
     while(1){
-//		puts("RECEIVE");
-        fcntl(c_fd, F_SETFL, O_NONBLOCK);
-		read(c_fd,&info,sizeof(info));
-		//printf("tag = %d, cmd = %d\n",info.tag, info.cmd);
+//      puts("RECEIVE");
+        //fcntl(c_fd, F_SETFL, O_NONBLOCK);
+        read(c_fd,&info,sizeof(info));
+        //printf("tag = %d, cmd = %d\n",info.tag, info.cmd);
         switch(info.tag){
             case UP:
                 m = updata(info);
                 if( m == -1  )
                     printf("file up error");
-				break;
+                break;
             case DOWN:
                 m = downdata(info,c_fd);
                 if(m == -1)
@@ -93,40 +97,43 @@ void *work(void * arg){
                     printf("file null");
                 break;
             case IMAGE:
-				printf("IMAGE cmd= %d\n", info.cmd);
-				x = info.cmd & 0xf000;
-				if(x >0){
-					//printf("xxxxx");
-					pthread_create(&pidImage,NULL, image,(void *)c_fd);
-					//image(info, c_fd);
-				}else{
-					pthread_cancel(pidImage);
-				}
+            //  printf("IMAGE cmd= %d\n", info.cmd);
+                x = info.cmd & 0xf000;
+                if(x >0){
+                    pthread_create(&pidImage,NULL, image,(void *)c_fd);
+                }else{
+                    pthread_cancel(pidImage);
+                }
                 break;
             case SONG:
-				song(info);
+                song(info);
                 break;
             case LED:
-				printf("LED cmd = %d\n",info.cmd);
-				led(info);
+                printf("LED cmd = %d\n",info.cmd);
+                led(info);
                 break;
             case TEMP:
-				printf("TEMP cmd = %d\n",info.cmd);
-				x = info.cmd & 0xf000000;
-				//printf("%d\n",x);
-				if(x >0){
-					printf("%d\n",c_fd);
-					pthread_create(&pidTemp,NULL, temp,(void *)c_fd);
-					//image(info, c_fd);
-				}else{
-					pthread_cancel(pidTemp);
-				}			
-				//temp(info);
+            //  printf("TEMP cmd = %d\n",info.cmd);
+                x = info.cmd & 0xf000000;
+                if(x >0){
+                    printf("%d\n",c_fd);
+                    pthread_create(&pidTemp,NULL, temp,(void *)c_fd);
+                }else{
+                    pthread_cancel(pidTemp);
+                }           
                 break;
             default:
                 ;
         }
-        memset(&info,0,sizeof(info));
+        /*if (info.tag == IMAGE || info.tag == TEMP){
+            x = info.cmd & 0xf000000+info.cmd & 0xf000;
+            if (x>0){
+                pthread_create(&pidTaI, NULL, TempAndImage, (void *)c_fd);
+            }else{
+                pthread_cancel(pidTaI);
+            }
+        }
+        memset(&info,0,sizeof(info));*/
     }
 }
 
@@ -160,31 +167,38 @@ int creatcon(int argc, char **argv){
 
 }
 
-void *image(void *arg){
-	while (1){
-		int c_fd = (int)arg;
-		puts("xxxxx");
-		strcpy(info.filename, "1.jpg");
-	//	strcpy(info.filename,getImageToPC());
-		printf("filename = %s\n", info.filename);
-		getImageToLCD();
-		FILE * fp_image = fopen(info.filename,"r");
-		if(!fp_image){
-			char *buf = "no such file\n";
-			printf("%s\n", buf);
-			return;
-			//return ERR;
-		}
-		fread(info.buf,sizeof(info.buf),1,fp_image);
-		info.buf[strlen(info.buf)] = '\0';
-		//printf("filename %s\n",info.filename);
-		//puts(filename);
-		write(c_fd,&info,sizeof(info));
-		sleep(1);
-	
-	}
-}
+/*void *TempAndImage(void *arg){
+    int c_fd = (int)arg;
+    int x;
+    while (1){
+        x = info.cmd & 0xf000;
+        if (x>0){
+            float t=0;
+            t = getTemp();
+            info.temp = t;
+            printf("t = %f\n",t);
+            printf("%d\n", c_fd);
+        }
 
+        x = info.cmd & 0xf000000;
+        if(x>0){
+            strcpy(info.filename, "1.jpg");
+            printf("filename = %s\n", info.filename);
+            getImageToLCD();
+            FILE * fp_image = fopen(info.filename,"r");
+            if(!fp_image){
+                char *buf = "no such file\n";
+                printf("%s\n", buf);
+                return;
+            }
+            fread(info.buf,sizeof(info.buf),1,fp_image);
+            info.buf[strlen(info.buf)] = '\0';
+        }
+        write(c_fd,&info,sizeof(info));
+        sleep(1);
+    
+    }
+}*/
 int song(INFO info){
 
 }
@@ -193,18 +207,37 @@ int led(INFO info){
 
 }
 
+void *image(void * arg){
+    int c_fd = (int)arg;
+    while(1){
+        strcpy(info.filename, "1.jpg");
+        printf("filename = %s\n", info.filename);
+        getImageToLCD();
+        FILE * fp_image = fopen(info.filename,"r");
+        if(!fp_image){
+            char *buf = "no such file\n";
+            printf("%s\n", buf);
+            return;
+        }
+        fread(info.buf,sizeof(info.buf),1,fp_image);
+        info.buf[strlen(info.buf)] = '\0';
+        write(c_fd,&info,sizeof(info));
+        sleep(1);
+    }
+}
+
 void *temp(void * arg){
-	int c_fd = (int)arg;
-	while (1){
-		float t=0;
-		t = getTemp();
-		info.temp = t;
-		printf("t = %f\n",t);
-		printf("%d\n", c_fd);
-		//fcntl(cli_fd, F_SETFL, O_NONBLOCK);
-		write(c_fd, &info, sizeof(info));
-		sleep(1);	
-	}
+    int c_fd = (int)arg;
+    while (1){
+        float t=0;
+        t = getTemp();
+        info.temp = t;
+        printf("t = %f\n",t);
+        printf("%d\n", c_fd);
+        //fcntl(cli_fd, F_SETFL, O_NONBLOCK);
+        write(c_fd, &info, sizeof(info));
+        sleep(1);   
+    }
 
 }
 int updata(INFO info){
@@ -232,7 +265,7 @@ int downdata(INFO info, int c_fd){
 }
 
 int check(INFO info,int c_fd){
-/*	FILE *fp_check=fopen(info.filename,"r");
+/*  FILE *fp_check=fopen(info.filename,"r");
     puts(info.filename);
     if( fp_check ){
         fclose(fp_check);
@@ -253,12 +286,12 @@ char *getImageToLCD(){
 }
 char *test = "1.jpg";
 char *getImageToPC(){
-	//static char test[32];
-	//strcpy(test,"1.jpg");
-	return test;
+    //static char test[32];
+    //strcpy(test,"1.jpg");
+    return test;
 }
 
 float getTemp(){
-	float k= 1.1;
-	return k;
+    float k= 1.1;
+    return k;
 }
