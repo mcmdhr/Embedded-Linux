@@ -10,17 +10,17 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     tcpsocket = new QTcpSocket(this);
-    connect(tcpsocket, SIGNAL(readyRead), this, SLOT(readMessage()));
+    connect(tcpsocket, SIGNAL(readyRead()), this, SLOT(readMessage()));
 }
 
 int MainWindow::newConnect(){
-    tcpsocket->abort();
+   /* tcpsocket->abort();
     QString ip = ui->lineEditIP->text();
     QString sport = ui->lineEditPort->text();
     int port = sport.toInt();
     tcpsocket->connectToHost(ip, port);
+    return 0;*/
     return 0;
-
 }
 
 
@@ -31,16 +31,14 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::readMessage(){
-qDebug()<<info.temp;
-    while(1){
-        recMessages(tcpsocket, info);
-        if ((info.cmd & 0xf000) >0){
-
-        }
-        if ((info.cmd & 0xf000000) > 0){
-            qDebug()<<info.temp;
-        }
-    }
+        INFO inforec;
+        memset(&inforec, 0, sizeof(inforec));
+        tcpsocket->read((char *)&inforec, sizeof(inforec));
+        qDebug()<<"TEMP:"<<inforec.temp;
+        qDebug()<<"IMAGE:"<<inforec.filename;
+       // if ((inforec.cmd & 0xf000000) > 0){
+       //     qDebug()<<"TEMP:"<<inforec.temp;
+       // }
 
 }
 
@@ -51,6 +49,7 @@ void MainWindow::on_btnConnect2Server_clicked()
     QString sport = ui->lineEditPort->text();
     addr.port = sport.toInt();
     creatConnect(tcpsocket, addr);
+    qDebug()<<tcpsocket->errorString();
     memset(&info, 0, sizeof(info));
 
 }

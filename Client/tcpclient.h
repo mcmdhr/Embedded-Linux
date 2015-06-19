@@ -20,6 +20,7 @@ typedef struct sockaddr SA;
 typedef struct info {
     int tag;
     int cmd;
+    char filename[32];
     char buf[1024];
     float temp;
 }INFO;

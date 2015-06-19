@@ -14,6 +14,7 @@ void creatConnect(QTcpSocket *tcpsocket, ADDR addr){
 void sendMessages(QTcpSocket *tcpsocket, INFO info){
 
    // tcpsocket->write();
+    //qDebug()<<info.cmd;
     tcpsocket->write((char *)&info,sizeof(info));
 }
 

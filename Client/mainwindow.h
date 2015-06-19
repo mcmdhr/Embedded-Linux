@@ -9,6 +9,8 @@
 #include <QtNetwork/QHostAddress>
 #include <QString>
 #include <QDebug>
+#include <QMessageBox>
+#include <windows.h>
 #include "tcpclient.h"
 
 
